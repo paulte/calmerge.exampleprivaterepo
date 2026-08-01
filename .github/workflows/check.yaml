@@ -1,0 +1,21 @@
+---
+name: Check Configuration
+
+permissions:
+  contents: read
+
+"on":
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+
+jobs:
+  check:
+    uses: paulte/calmerge/.github/workflows/check-configuration.yml@main

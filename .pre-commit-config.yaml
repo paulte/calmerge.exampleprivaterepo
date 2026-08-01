@@ -1,0 +1,43 @@
+---
+repos:
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-ast
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        exclude: \.ics$
+  - repo: local
+    hooks:
+      - id: yamlfmt
+        name: yamlfmt
+        entry: yamlfmt
+        language: system
+        types:
+          - yaml
+        pass_filenames: true
+
+      - id: validate-calmerge-config
+        name: Validate calmerge configuration
+        entry: python -c "from calmerge.config import load_config; load_config('calendars.yaml')"
+        language: system
+        files: ^calendars\.yaml$
