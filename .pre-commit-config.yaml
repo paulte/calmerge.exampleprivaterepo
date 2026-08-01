@@ -38,6 +38,6 @@ repos:
 
       - id: validate-calmerge-config
         name: Validate calmerge configuration
-        entry: python -c "from calmerge.config import load_config; load_config('calendars.yaml')"
+        entry: python -c "from pathlib import Path; from calmerge.config import load_config; load_config(Path('calendars.yaml'))"
         language: system
         files: ^calendars\.yaml$
