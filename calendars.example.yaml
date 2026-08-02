@@ -1,29 +1,139 @@
 ---
 # Example CalMerge configuration
 #
-# Copy this file to calendars.yaml and customise:
+# Copy this file:
 #
-#   cp examples/calendars.example.yaml calendars.yaml
+#   cp calendars.example.yaml calendars.yaml
 #
-# Each calendar requires:
-#   name   - unique friendly name
-#   url    - ICS calendar URL
+# Then replace the example calendar URLs with your own ICS feeds.
 #
-# Optional:
-#   color  - Apple Calendar colour (hex value)
-#   prefix - text added to event titles
+#
+# Calendar fields:
+#
+#   name:
+#     Required. A unique friendly name for the calendar.
+#
+#   url:
+#     Required. The ICS feed URL.
+#
+#   prefix:
+#     Optional. Text added to event titles in the merged calendar.
+#
+#   color:
+#     Optional. Apple Calendar colour (hex value).
+#
+#
+# Exclusions:
+#
+# Exclusion rules remove events before the calendars are merged.
+#
+# All conditions within a single rule are combined using AND logic.
+#
+# Supported matching:
+#
+#   calendar:
+#     name:
+#       regex: "..."
+#
+#   event:
+#     summary:
+#       regex: "..."
+#
+# Regular expressions are Python-compatible regex patterns.
 
-calendar_name: "My Calendar"
+
+calendar_name: "Example Merged Calendar"
+
+
+exclusions:
+  rules:
+
+    # Exclude events from any calendar where the title contains
+    # "Cancelled".
+    #
+    # Matches:
+    #   Cancelled meeting
+    #   Event Cancelled
+    #
+    - id: exclude-cancelled-events
+      event:
+        summary:
+          regex: "Cancelled"
+
+
+    # Exclude all calendars with "Internal" in the calendar name.
+    #
+    # Useful when a source calendar contains information that should
+    # not appear in the merged output.
+    #
+    - id: exclude-internal-calendars
+      calendar:
+        name:
+          regex: "Internal"
+
+
+    # Exclude only matching events from a specific calendar.
+    #
+    # Both conditions must match:
+    #
+    #   Calendar name contains "Training"
+    #   Event title contains "Optional"
+    #
+    - id: exclude-optional-training
+      calendar:
+        name:
+          regex: "Training"
+      event:
+        summary:
+          regex: "Optional"
+
+
+    # Example of a rule that will never match.
+    #
+    # Useful as a template when adding new rules.
+    #
+    - id: example-disabled-rule
+      event:
+        summary:
+          regex: "^DOES-NOT-MATCH$"
+
 
 calendars:
-  - name: "Example Calendar"
-    prefix: "Example"
-    url: "https://example.com/calendar.ics"
+
+  # A personal calendar feed.
+  - name: "Personal Calendar"
+    prefix: "Personal"
+    url: "https://example.com/personal/calendar.ics"
     color: "#1E90FF"
 
-# Add additional calendars:
-#
-# - name: "Another Calendar"
-#   prefix: "Another"
-#   url: "https://example.com/another-calendar.ics"
-#   color: "#FF4500"
+
+  # A work calendar feed.
+  - name: "Work Calendar"
+    prefix: "Work"
+    url: "https://example.com/work/calendar.ics"
+    color: "#228B22"
+
+
+  # A project calendar feed.
+  #
+  # Multiple calendars can use the same prefix.
+  - name: "Project Alpha Events"
+    prefix: "Project"
+    url: "https://example.com/project/events.ics"
+    color: "#FF8C00"
+
+
+  # A second project feed.
+  #
+  # Demonstrates merging multiple related feeds.
+  - name: "Project Alpha Deadlines"
+    prefix: "Project"
+    url: "https://example.com/project/deadlines.ics"
+    color: "#8B0000"
+
+
+  # External calendar feed.
+  - name: "External Events"
+    prefix: "External"
+    url: "https://example.com/external/events.ics"
+    color: "#800080"
