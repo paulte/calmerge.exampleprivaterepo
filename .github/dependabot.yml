@@ -10,8 +10,3 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
-
-
-
-
-# dependabot-trigger: 2026-08-10T20:55:43Z
