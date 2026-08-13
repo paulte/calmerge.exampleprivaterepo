@@ -20,4 +20,4 @@ permissions:
 
 jobs:
   build:
-    uses: paulte/calmerge/.github/workflows/build-calendar.yml@main
+    uses: paulte/calmerge/.github/workflows/build-calendar.yml@e3db678a059d2e5a0d56c38cd50d3c2bc7ed75b3 # main
