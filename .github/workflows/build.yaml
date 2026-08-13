@@ -19,5 +19,30 @@ permissions:
   workflow_dispatch:
 
 jobs:
+  check-config:
+    name: Check calendar configuration
+    runs-on: ubuntu-latest
+
+    outputs:
+      has_config: ${{ steps.check.outputs.has_config }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check for calendars.yaml
+        id: check
+        run: |
+          if [ -f "calendars.yaml" ]; then
+            echo "calendars.yaml found"
+            echo "has_config=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "calendars.yaml not found - skipping build"
+            echo "has_config=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
-    uses: paulte/calmerge/.github/workflows/build-calendar.yml@e3db678a059d2e5a0d56c38cd50d3c2bc7ed75b3 # main
+    name: Build Calendar
+    needs: check-config
+    if: needs.check-config.outputs.has_config == 'true'
+    uses: paulte/calmerge/.github/workflows/build-calendar.yml@main
