@@ -7,78 +7,53 @@
 #
 # Then replace the example calendar URLs with your own ICS feeds.
 #
+# This example expands the Exclusions section to show how to filter
+# events by date ranges using `min` and `max` on date-like event fields
+# (for example `dtstart`).
 #
-# Calendar fields:
+# Key points about date-range matching:
 #
-#   name:
-#     Required. A unique friendly name for the calendar.
+# - Supported input formats for min/max:
+#     - Date-only: "YYYY-MM-DD"            (treated as start of day UTC)
+#     - Datetime with Z: "YYYY-MM-DDTHH:MM:SSZ"
+#     - Datetime with offset: "YYYY-MM-DDTHH:MM:SS+HH:MM"
+#     - ISO datetimes without timezone are treated as UTC
 #
-#   url:
-#     Required. The ICS feed URL.
+# - Inclusive bounds:
+#     - "min" is inclusive: event_dt >= min
+#     - "max" is inclusive: event_dt <= max
 #
-#   prefix:
-#     Optional. Text added to event titles in the merged calendar.
+# - Field names in matcher should be the event property (lowercase is fine,
+#   e.g. dtstart) — the matcher code uppercases the field when looking up
+#   the iCalendar property (DTSTART, DTEND, etc).
 #
-#   color:
-#     Optional. Apple Calendar colour (hex value).
+# - If an event lacks the matched field (e.g. no DTSTART) or it cannot be
+#   parsed, that event does not match the date-range condition.
 #
+# - You may combine calendar matching and event matching in the same rule.
+#   All conditions within a single rule are combined with AND logic.
 #
-# Exclusions:
-#
-# Exclusion rules remove events before the calendars are merged.
-#
-# All conditions within a single rule are combined using AND logic.
-#
-# Supported matching:
-#
-#   calendar:
-#     name:
-#       regex: "..."
-#
-#   event:
-#     summary:
-#       regex: "..."
-#
-# Regular expressions are Python-compatible regex patterns.
-
+# Examples below demonstrate common usages and pitfalls.
 
 calendar_name: "Example Merged Calendar"
-
 
 exclusions:
   rules:
 
-    # Exclude events from any calendar where the title contains
-    # "Cancelled".
-    #
-    # Matches:
-    #   Cancelled meeting
-    #   Event Cancelled
-    #
+    # 1) Exclude events whose SUMMARY contains "Cancelled" (regex).
     - id: exclude-cancelled-events
       event:
         summary:
           regex: "Cancelled"
 
-
-    # Exclude all calendars with "Internal" in the calendar name.
-    #
-    # Useful when a source calendar contains information that should
-    # not appear in the merged output.
-    #
+    # 2) Exclude any calendar where the calendar NAME contains "Internal".
     - id: exclude-internal-calendars
       calendar:
         name:
           regex: "Internal"
 
-
-    # Exclude only matching events from a specific calendar.
-    #
-    # Both conditions must match:
-    #
-    #   Calendar name contains "Training"
-    #   Event title contains "Optional"
-    #
+    # 3) Exclude only optional items from training calendars.
+    #    Both the calendar.name regex and the event.summary regex must match.
     - id: exclude-optional-training
       calendar:
         name:
@@ -87,16 +62,53 @@ exclusions:
         summary:
           regex: "Optional"
 
+    # 4) Exclude events that start strictly before 2026-08-01.
+    #    Because bounds are inclusive, use max="2026-07-31T23:59:59Z" to
+    #    exclude any event whose DTSTART is on or before 2026-07-31 23:59:59 UTC.
+    #
+    #    NOTE: Using max: "2026-08-01" would match events with DTSTART <=
+    #    2026-08-01T00:00:00Z (i.e. it includes midnight on 2026-08-01).
+    - id: exclude-before-august-2026
+      event:
+        dtstart:
+          max: "2026-07-31T23:59:59Z"
 
-    # Example of a rule that will never match.
+    # 5) Exclude events that start on or after 2027-01-01 (min only).
+    #    Use a date-only string as the inclusive lower bound (start of day UTC).
+    - id: exclude-from-2027
+      event:
+        dtstart:
+          min: "2027-01-01"
+
+    # 6) Exclude events that are outside the August 2026 window for calendars
+    #    that have the "Project" prefix. This rule requires BOTH the calendar
+    #    prefix match AND the event dtstart to be within the min/max range.
     #
-    # Useful as a template when adding new rules.
-    #
+    #    The min and max here are inclusive: events with DTSTART between
+    #    2026-08-01T00:00:00Z and 2026-08-31T23:59:59Z (inclusive) match this rule.
+    - id: project-only-outside-august
+      calendar:
+        prefix:
+          regex: "^Project$"
+      event:
+        dtstart:
+          min: "2026-08-01"
+          max: "2026-08-31T23:59:59Z"
+
+    # 7) Combine text matching and a date bound: exclude meetings called
+    #    "Review" that occur before 2026-06-01.
+    - id: exclude-old-reviews
+      event:
+        summary:
+          regex: "(?i)review"
+        dtstart:
+          max: "2026-05-31T23:59:59Z"
+
+    # 8) Template / disabled example (won't match).
     - id: example-disabled-rule
       event:
         summary:
           regex: "^DOES-NOT-MATCH$"
-
 
 calendars:
 
@@ -106,13 +118,11 @@ calendars:
     url: "https://example.com/personal/calendar.ics"
     color: "#1E90FF"
 
-
   # A work calendar feed.
   - name: "Work Calendar"
     prefix: "Work"
     url: "https://example.com/work/calendar.ics"
     color: "#228B22"
-
 
   # A project calendar feed.
   #
@@ -122,7 +132,6 @@ calendars:
     url: "https://example.com/project/events.ics"
     color: "#FF8C00"
 
-
   # A second project feed.
   #
   # Demonstrates merging multiple related feeds.
@@ -130,7 +139,6 @@ calendars:
     prefix: "Project"
     url: "https://example.com/project/deadlines.ics"
     color: "#8B0000"
-
 
   # External calendar feed.
   - name: "External Events"
