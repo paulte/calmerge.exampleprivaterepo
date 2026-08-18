@@ -22,5 +22,20 @@
 
   "labels": [
     "dependencies"
+  ],
+
+  "packageRules": [
+    {
+      "description": "Mark non-major dependency updates for automerge",
+      "matchUpdateTypes": [
+        "patch",
+        "pinDigest",
+        "minor",
+        "digest"
+      ],
+      "addLabels": [
+        "automerge"
+      ]
+    }
   ]
 }
