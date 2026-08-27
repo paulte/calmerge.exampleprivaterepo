@@ -45,4 +45,4 @@ jobs:
     name: Build Calendar
     needs: check-config
     if: needs.check-config.outputs.has_config == 'true'
-    uses: paulte/calmerge/.github/workflows/build-calendar.yml@f1eabfd9198bdd28b4bc62a91d570464bcda064c # main
+    uses: paulte/calmerge/.github/workflows/build-calendar.yml@51a0ebd2e0b61d711252076f4462e772e5d061b9 # main
