@@ -41,4 +41,4 @@ jobs:
   check:
     needs: check-config
     if: needs.check-config.outputs.has_config == 'true'
-    uses: paulte/calmerge/.github/workflows/check-configuration.yml@95d007dbcf589d70f21794ad16989a1208b7f7b5 # main
+    uses: paulte/calmerge/.github/workflows/check-configuration.yml@256fa4434b548151ac566c530963d5de54beed17 # main
